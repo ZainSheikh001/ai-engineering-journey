@@ -1,0 +1,24 @@
+# Secrets
+.env
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data and models (keep repos small)
+data/raw/
+*.bin
+*.safetensors
+*.pt
+chroma/
+.chroma/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

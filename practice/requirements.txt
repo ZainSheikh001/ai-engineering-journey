@@ -1,0 +1,6 @@
+   google-genai
+   groq
+   pydantic
+   python-dotenv
+   pytest
+   
