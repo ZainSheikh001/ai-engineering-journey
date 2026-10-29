@@ -1,26 +1,54 @@
-# AI Engineering Journey
+# LLM Structured Output with Pydantic
 
-My hands-on path to becoming an AI Engineer: LLM applications, RAG, agents,
-evaluation, and deployment, built with free tools.
+Classifies customer support messages (English or Roman Urdu) into
+structured, validated data using an LLM.
 
-## Structure
+## How it works
 
-| Folder | What's inside |
-| --- | --- |
-| `practice/` | Concept drills, one folder per topic |
-| `tracking/` | Progress tracker, learning log, weekly notes |
+1. A customer message is sent to an LLM (Groq, `openai/gpt-oss-20b`) with a system prompt.
+2. The LLM returns JSON: `category`, `urgency`, `needs_human`.
+3. Pydantic validates it: required fields, correct types, allowed values only.
+4. Invalid output is caught and handled instead of crashing.
 
-## Progress
+**Example**
 
-- **Week 1: LLM API basics.** API calls, tokens and cost, system prompts,
-  structured output with Pydantic, automated tests.
-  See [`practice/04-structured-output`](practice/04-structured-output).
+- Input: `Mera order 10 din se nahi aya, paise wapas chahiye abhi!`
+- Output: `category='refund' urgency='high' needs_human=True`
 
-## Portfolio projects (coming soon)
+## How to run
 
-- **Pakistan Regulation Assistant:** RAG over SBP/FBR circulars with citations
-- **Roman-Urdu Support Agent:** an LLM agent for Pakistani customer support
+```
+pip install -r requirements.txt
+python 04-structured-output/step5_llm_pydantic.py
+pytest 04-structured-output
+```
 
-## Stack
+Copy `.env.example` to `.env` and add your own API keys first.
 
-Python · Gemini API · Groq · Pydantic · pytest · Git
+## Why validate LLM output?
+
+LLMs do not always follow instructions. Even in JSON mode, a model can return
+JSON that is valid but wrong for the app: a missing field, the wrong type, or
+an invented value such as "urgent" instead of "high". Pydantic checks every
+response at the boundary, so bad data is rejected before it reaches the rest
+of the system instead of causing confusing errors later.
+
+## Testing
+
+The validation logic is tested with pytest using fixed example outputs, not
+the live LLM, so the tests are free, fast and give the same result every run.
+
+- valid output is accepted
+- output with missing fields is rejected
+- output with values outside the allowed list is rejected
+
+I also broke the code on purpose (removed `"high"` from the allowed values)
+to confirm the tests catch the mistake.
+
+## What I learned
+
+- LLMs return text, so structured output needs both JSON mode (valid format)
+  and schema validation (correct content).
+- `try/except` lets an app handle bad model output gracefully instead of crashing.
+- Test your own logic, not the external API: tests should be deterministic,
+  free and fast.
